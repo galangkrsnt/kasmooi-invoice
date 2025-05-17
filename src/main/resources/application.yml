@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: kasmooi-invoice
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+
+  output:
+    ansi:
+      enabled: always
+
+server:
+  port: 8080
+  error:
+    include-message: always

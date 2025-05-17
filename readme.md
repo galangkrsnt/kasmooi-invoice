@@ -35,5 +35,5 @@ tax calculations, and client-company records — ready to scale.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/kasmooi-invoice.git
+git clone https://github.com/galangkrsnt/kasmooi-invoice
 cd kasmooi-invoice
