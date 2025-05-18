@@ -7,6 +7,7 @@ import com.kasmooi.invoice.mapper.GenericMapper;
 import com.kasmooi.invoice.model.dto.request.company.CompanyCreateRequestDto;
 import com.kasmooi.invoice.model.dto.response.GenericResponseDto;
 import com.kasmooi.invoice.model.dto.response.company.CompanyCreateResponseDto;
+import com.kasmooi.invoice.model.dto.response.company.CompanyGetResponseDto;
 import com.kasmooi.invoice.model.entity.Company;
 import com.kasmooi.invoice.repository.CompanyRepository;
 import com.kasmooi.invoice.service.impl.CompanyServiceImpl;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,5 +72,112 @@ public class CompanyServiceImplTest {
         assertEquals(responseDto.getId(), result.getData().getId());
 
         verify(companyRepository, times(1)).save(company);
+    }
+
+    @Test
+    void getAllCompanies_shouldReturnSuccessResponse() {
+        Company company1 = new Company();
+        company1.setId(UUID.randomUUID());
+        company1.setName("PT Kasmooi Digital");
+
+        Company company2 = new Company();
+        company2.setId(UUID.randomUUID());
+        company2.setName("PT Techno Jaya");
+
+        List<Company> companyList = List.of(company1, company2);
+
+        CompanyGetResponseDto dto1 = new CompanyGetResponseDto();
+        dto1.setId(company1.getId());
+        dto1.setName(company1.getName());
+
+        CompanyGetResponseDto dto2 = new CompanyGetResponseDto();
+        dto2.setId(company2.getId());
+        dto2.setName(company2.getName());
+
+        List<CompanyGetResponseDto> dtoList = List.of(dto1, dto2);
+
+        GenericResponseDto<List<CompanyGetResponseDto>> expectedResponse = new GenericResponseDto<>();
+        expectedResponse.setResponseCode("200");
+        expectedResponse.setResponseMessage("Success");
+        expectedResponse.setData(dtoList);
+
+        Mockito.when(companyRepository.findAll()).thenReturn(companyList);
+        Mockito.when(companyMapper.toCompanyResponseDtoList(companyList)).thenReturn(dtoList);
+        Mockito.when(genericMapper.toGenericResponse(
+                ResponseCode.SUCCESS,
+                ResponseMessage.SUCCESS,
+                dtoList
+        )).thenReturn(expectedResponse);
+        GenericResponseDto<List<CompanyGetResponseDto>> actualResponse = companyService.getAllCompanies();
+
+        assertEquals(ResponseCode.SUCCESS, actualResponse.getResponseCode());
+        assertEquals(ResponseMessage.SUCCESS, actualResponse.getResponseMessage());
+        assertNotNull(actualResponse.getData());
+        assertEquals(2, actualResponse.getData().size());
+        assertEquals("PT Kasmooi Digital", actualResponse.getData().get(0).getName());
+    }
+
+    @Test
+    void testGetCompanyById_Success() {
+        UUID id = UUID.randomUUID();
+
+        Company company = new Company();
+        company.setId(id);
+        company.setName("Kasmooi Tech");
+        company.setAddress("Jl. Merdeka No.123, Jakarta");
+        company.setPhone("+62-812-3456-7890");
+        company.setEmail("info@kasmooi.com");
+        company.setTaxNumber("NPWP-12.345.678.9-012.000");
+
+        CompanyGetResponseDto responseDto = new CompanyGetResponseDto();
+        responseDto.setId(id);
+        responseDto.setName(company.getName());
+        responseDto.setAddress(company.getAddress());
+        responseDto.setPhone(company.getPhone());
+        responseDto.setEmail(company.getEmail());
+        responseDto.setTaxNumber(company.getTaxNumber());
+
+        GenericResponseDto<CompanyGetResponseDto> expectedResponse = new GenericResponseDto<>();
+        expectedResponse.setResponseCode(ResponseCode.SUCCESS);
+        expectedResponse.setResponseMessage(ResponseMessage.SUCCESS);
+        expectedResponse.setData(responseDto);
+
+        when(companyRepository.findById(id)).thenReturn(java.util.Optional.of(company));
+        when(companyMapper.toCompanyResponseDto(company)).thenReturn(responseDto);
+        when(genericMapper.toGenericResponse(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, responseDto)).thenReturn(expectedResponse);
+
+        GenericResponseDto<CompanyGetResponseDto> result = companyService.getCompanyById(id);
+
+        assertNotNull(result);
+        assertEquals(ResponseCode.SUCCESS, result.getResponseCode());
+        assertEquals(ResponseMessage.SUCCESS, result.getResponseMessage());
+        assertEquals(responseDto.getId(), result.getData().getId());
+
+        verify(companyRepository, times(1)).findById(id);
+    }
+
+    @Test
+    void testGetCompanyById_NotFound() {
+        UUID id = UUID.randomUUID();
+
+        when(companyRepository.findById(id)).thenReturn(java.util.Optional.empty());
+
+        GenericResponseDto<CompanyGetResponseDto> expectedResponse = new GenericResponseDto<>();
+        expectedResponse.setResponseCode(ResponseCode.NOT_FOUND);
+        expectedResponse.setResponseMessage(ResponseMessage.COMPANY_NOT_FOUND);
+        expectedResponse.setData(null);
+
+        Mockito.<GenericResponseDto<CompanyGetResponseDto>>when(
+                genericMapper.toGenericResponse(ResponseCode.NOT_FOUND, ResponseMessage.COMPANY_NOT_FOUND, null))
+                .thenReturn(expectedResponse);
+
+        GenericResponseDto<CompanyGetResponseDto> result = companyService.getCompanyById(id);
+
+        assertNotNull(result);
+        assertEquals(ResponseCode.NOT_FOUND, result.getResponseCode());
+        assertEquals(ResponseMessage.COMPANY_NOT_FOUND, result.getResponseMessage());
+        assertNull(result.getData());
+
+        verify(companyRepository, times(1)).findById(id);
     }
 }
