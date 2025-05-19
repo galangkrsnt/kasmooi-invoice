@@ -54,4 +54,13 @@ public class CompanyController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GenericResponseDto<Void>> deleteCompany(@PathVariable UUID id) {
+        GenericResponseDto<Void> response = companyService.deleteCompanyById(id);
+        if (ResponseCode.NOT_FOUND.equals(response.getResponseCode())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 }

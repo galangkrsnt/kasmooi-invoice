@@ -19,4 +19,5 @@ public interface CompanyService {
 
     GenericResponseDto<CompanyUpdateResponseDto> updateCompany(UUID id, CompanyUpdateRequestDto requestDto);
 
+    GenericResponseDto<Void> deleteCompanyById(UUID id);
 }

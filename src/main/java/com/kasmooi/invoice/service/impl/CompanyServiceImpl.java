@@ -108,4 +108,27 @@ public class CompanyServiceImpl implements CompanyService {
         return response;
     }
 
+    @Override
+    public GenericResponseDto<Void> deleteCompanyById(UUID id) {
+        GenericResponseDto<Void> response;
+        try {
+            log.debug("Deleting company with ID: {}", id);
+
+            boolean exists = companyRepository.existsById(id);
+            if (!exists) {
+                log.warn("Company not found with ID: {}", id);
+                return genericMapper.toGenericResponse(ResponseCode.NOT_FOUND, ResponseMessage.COMPANY_NOT_FOUND, null);
+            }
+
+            companyRepository.deleteById(id);
+            log.info("Company deleted successfully with ID: {}", id);
+
+            response = genericMapper.toGenericResponse(ResponseCode.SUCCESS, ResponseMessage.COMPANY_DELETED, null);
+        } catch (Exception e) {
+            log.error("Failed to delete company with ID: {}", id, e);
+            response = genericMapper.toGenericResponse(ResponseCode.INTERNAL_ERROR, ResponseMessage.SERVER_ERROR, null);
+        }
+        return response;
+    }
+
 }

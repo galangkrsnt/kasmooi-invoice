@@ -251,4 +251,33 @@ public class CompanyServiceImplTest {
         verify(companyRepository, times(1)).findById(id);
         verify(companyRepository, times(1)).save(existingCompany);
     }
+
+    @Test
+    void deleteCompanyById_Success() {
+        UUID id = UUID.randomUUID();
+
+        when(companyRepository.existsById(id)).thenReturn(true);
+        doNothing().when(companyRepository).deleteById(id);
+
+        GenericResponseDto<Void> successResponse = new GenericResponseDto<>();
+        successResponse.setResponseCode(ResponseCode.SUCCESS);
+        successResponse.setResponseMessage("Company data deleted");
+        successResponse.setData(null);
+
+        when(genericMapper.<Void>toGenericResponse(
+                eq(ResponseCode.SUCCESS),
+                eq("Company data deleted"),
+                isNull()))
+                .thenReturn(successResponse);
+
+        GenericResponseDto<Void> actualResponse = companyService.deleteCompanyById(id);
+
+        assertNotNull(actualResponse);
+        assertEquals(ResponseCode.SUCCESS, actualResponse.getResponseCode());
+        assertEquals("Company data deleted", actualResponse.getResponseMessage());
+        assertNull(actualResponse.getData());
+
+        verify(companyRepository).existsById(id);
+        verify(companyRepository).deleteById(id);
+    }
 }

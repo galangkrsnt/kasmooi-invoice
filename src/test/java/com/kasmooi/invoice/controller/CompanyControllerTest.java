@@ -1,6 +1,7 @@
 package com.kasmooi.invoice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kasmooi.invoice.constant.ResponseCode;
 import com.kasmooi.invoice.model.dto.request.company.CompanyCreateRequestDto;
 import com.kasmooi.invoice.model.dto.request.company.CompanyUpdateRequestDto;
 import com.kasmooi.invoice.model.dto.response.GenericResponseDto;
@@ -163,7 +164,7 @@ class CompanyControllerTest {
 
         GenericResponseDto<CompanyUpdateResponseDto> response = new GenericResponseDto<>();
         response.setResponseCode("200");
-        response.setResponseMessage("Company updated successfully");
+        response.setResponseMessage("Company data updated successfully");
         response.setData(updateResponseDto);
 
         Mockito.when(companyService.updateCompany(Mockito.eq(id), Mockito.any(CompanyUpdateRequestDto.class)))
@@ -174,8 +175,44 @@ class CompanyControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.responseCode").value("200"))
-                .andExpect(jsonPath("$.responseMessage").value("Company updated successfully"))
+                .andExpect(jsonPath("$.responseMessage").value("Company data updated successfully"))
                 .andExpect(jsonPath("$.data.id").value(id.toString()))
                 .andExpect(jsonPath("$.data.name").value("Kasmooi Updated"));
+    }
+
+    @Test
+    void testDeleteCompany_Success() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        GenericResponseDto<Void> response = new GenericResponseDto<>();
+        response.setResponseCode(ResponseCode.SUCCESS);
+        response.setResponseMessage("Company data deleted");
+        response.setData(null);
+
+        Mockito.when(companyService.deleteCompanyById(id)).thenReturn(response);
+
+        mockMvc.perform(delete("/api/v1/company/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.responseCode").value(ResponseCode.SUCCESS))
+                .andExpect(jsonPath("$.responseMessage").value("Company data deleted"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void testDeleteCompany_NotFound() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        GenericResponseDto<Void> response = new GenericResponseDto<>();
+        response.setResponseCode(ResponseCode.NOT_FOUND);
+        response.setResponseMessage("Company not found");
+        response.setData(null);
+
+        Mockito.when(companyService.deleteCompanyById(id)).thenReturn(response);
+
+        mockMvc.perform(delete("/api/v1/company/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.responseCode").value(ResponseCode.NOT_FOUND))
+                .andExpect(jsonPath("$.responseMessage").value("Company not found"))
+                .andExpect(jsonPath("$.data").doesNotExist());
     }
 }
