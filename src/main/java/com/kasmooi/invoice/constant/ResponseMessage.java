@@ -6,4 +6,6 @@ public class ResponseMessage {
     public static final String INVALID_REQUEST = "Invalid request";
     public static final String SERVER_ERROR = "Internal server error";
     public static final String SUCCESS = "Success";
+    public static final String COMPANY_UPDATED = "Company data updated successfully";
+
 }

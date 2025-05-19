@@ -2,9 +2,11 @@ package com.kasmooi.invoice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kasmooi.invoice.model.dto.request.company.CompanyCreateRequestDto;
+import com.kasmooi.invoice.model.dto.request.company.CompanyUpdateRequestDto;
 import com.kasmooi.invoice.model.dto.response.GenericResponseDto;
 import com.kasmooi.invoice.model.dto.response.company.CompanyCreateResponseDto;
 import com.kasmooi.invoice.model.dto.response.company.CompanyGetResponseDto;
+import com.kasmooi.invoice.model.dto.response.company.CompanyUpdateResponseDto;
 import com.kasmooi.invoice.service.CompanyService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,8 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CompanyController.class)
@@ -84,7 +85,7 @@ class CompanyControllerTest {
 
         Mockito.when(companyService.getAllCompanies()).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/company/get-all")
+        mockMvc.perform(get("/api/v1/company")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.responseCode").value("200"))
@@ -113,7 +114,7 @@ class CompanyControllerTest {
 
         Mockito.when(companyService.getCompanyById(id)).thenReturn(genericResponse);
 
-        mockMvc.perform(get("/api/v1/company/get/{id}", id.toString())
+        mockMvc.perform(get("/api/v1/company/{id}", id.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.responseCode").value("200"))
@@ -133,11 +134,48 @@ class CompanyControllerTest {
 
         Mockito.when(companyService.getCompanyById(id)).thenReturn(genericResponse);
 
-        mockMvc.perform(get("/api/v1/company/get/{id}", id.toString())
+        mockMvc.perform(get("/api/v1/company/{id}", id.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.responseCode").value("404"))
                 .andExpect(jsonPath("$.responseMessage").value("Company not found"))
                 .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void testUpdateCompany_Success() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        CompanyUpdateRequestDto updateRequest = new CompanyUpdateRequestDto();
+        updateRequest.setName("Kasmooi Updated");
+        updateRequest.setAddress("Jl. Sudirman No.456, Jakarta");
+        updateRequest.setPhone("+62-812-9999-8888");
+        updateRequest.setEmail("updated@kasmooi.com");
+        updateRequest.setTaxNumber("NPWP-99.888.777.6-000.000");
+
+        CompanyUpdateResponseDto updateResponseDto = new CompanyUpdateResponseDto();
+        updateResponseDto.setId(id);
+        updateResponseDto.setName(updateRequest.getName());
+        updateResponseDto.setAddress(updateRequest.getAddress());
+        updateResponseDto.setPhone(updateRequest.getPhone());
+        updateResponseDto.setEmail(updateRequest.getEmail());
+        updateResponseDto.setTaxNumber(updateRequest.getTaxNumber());
+
+        GenericResponseDto<CompanyUpdateResponseDto> response = new GenericResponseDto<>();
+        response.setResponseCode("200");
+        response.setResponseMessage("Company updated successfully");
+        response.setData(updateResponseDto);
+
+        Mockito.when(companyService.updateCompany(Mockito.eq(id), Mockito.any(CompanyUpdateRequestDto.class)))
+                .thenReturn(response);
+
+        mockMvc.perform(put("/api/v1/company/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.responseCode").value("200"))
+                .andExpect(jsonPath("$.responseMessage").value("Company updated successfully"))
+                .andExpect(jsonPath("$.data.id").value(id.toString()))
+                .andExpect(jsonPath("$.data.name").value("Kasmooi Updated"));
     }
 }

@@ -2,9 +2,11 @@ package com.kasmooi.invoice.controller;
 
 import com.kasmooi.invoice.constant.ResponseCode;
 import com.kasmooi.invoice.model.dto.request.company.CompanyCreateRequestDto;
+import com.kasmooi.invoice.model.dto.request.company.CompanyUpdateRequestDto;
 import com.kasmooi.invoice.model.dto.response.GenericResponseDto;
 import com.kasmooi.invoice.model.dto.response.company.CompanyCreateResponseDto;
 import com.kasmooi.invoice.model.dto.response.company.CompanyGetResponseDto;
+import com.kasmooi.invoice.model.dto.response.company.CompanyUpdateResponseDto;
 import com.kasmooi.invoice.service.CompanyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,19 +31,27 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/get-all")
+    @GetMapping
     public ResponseEntity<GenericResponseDto<List<CompanyGetResponseDto>>> getAllCompanies() {
         GenericResponseDto<List<CompanyGetResponseDto>> companies = companyService.getAllCompanies();
         return ResponseEntity.status(HttpStatus.OK).body(companies);
     }
 
-    @GetMapping("/get/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<GenericResponseDto<CompanyGetResponseDto>> getCompanyById(@PathVariable UUID id) {
         GenericResponseDto<CompanyGetResponseDto> company = companyService.getCompanyById(id);
         if (ResponseCode.NOT_FOUND.equals(company.getResponseCode())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(company);
         }
         return ResponseEntity.status(HttpStatus.OK).body(company);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GenericResponseDto<CompanyUpdateResponseDto>> updateCompany(
+            @PathVariable UUID id,
+            @RequestBody CompanyUpdateRequestDto requestDto) {
+        GenericResponseDto<CompanyUpdateResponseDto> response = companyService.updateCompany(id, requestDto);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
