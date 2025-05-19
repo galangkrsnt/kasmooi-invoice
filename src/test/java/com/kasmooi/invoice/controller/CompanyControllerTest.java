@@ -56,7 +56,7 @@ class CompanyControllerTest {
 
         Mockito.when(companyService.createCompany(Mockito.any())).thenReturn(response);
 
-        mockMvc.perform(post("/api/v1/company/create")
+        mockMvc.perform(post("/api/v1/company")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())

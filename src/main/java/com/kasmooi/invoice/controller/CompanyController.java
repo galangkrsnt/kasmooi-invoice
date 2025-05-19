@@ -24,7 +24,7 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<GenericResponseDto<CompanyCreateResponseDto>> createCompany(
             @Valid @RequestBody CompanyCreateRequestDto request) {
         GenericResponseDto<CompanyCreateResponseDto> response = companyService.createCompany(request);
