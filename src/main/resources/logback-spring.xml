@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console appender -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId:-}] %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="Console" />
+    </root>
+
+    <!-- Package specific log level -->
+    <logger name="com.kasmooi.invoice" level="DEBUG" additivity="false">
+        <appender-ref ref="Console" />
+    </logger>
+
+</configuration>
